@@ -26,4 +26,5 @@ Yapılacaklar:
 8) Tablo4 teki başarı sütunu Tablo5'te ana satıra dönüşüyor (yani Tablo5'te her öğrenciye özel oluyor). Tablo5 doldurulurken Tablo1'deki satırlar, Tablo5'in ana satırı ve 100 çarpılıyor. Buradaki başarı oranı ise Tablo5 satır toplamı / (Tablo1 satırı * 100) şeklinde hesaplanıyor.
 
 1,2,3 -> Emrah
-4,5,6,7
+4,5,6,7,8 - Yavuz
+Excel yazdırma -> Talha
