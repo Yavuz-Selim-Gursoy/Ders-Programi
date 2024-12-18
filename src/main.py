@@ -17,10 +17,10 @@ class Lesson:
         inputFolderName (str) : Lesson folder name.
         tableOneDataFrame (pd.DataFrame) : Lesson's table one dataframe.
         tableTwoDataFrame (pd.DataFrame) : Lesson's table two dataframe.
-        TODO: tableThreeDataFrame (pd.DataFrame) : Lesson's table three dataframe. *MEMBER FUNC* builds this dataframe and writes it into 'table3.xlsx'.
+        tableThreeDataFrame (pd.DataFrame) : Lesson's table three dataframe.
     Member Functions:
         TODO: setter and getter functions
-        _create_dataframe_from_table(self): Creates table three dataframe.
+        _create_dataframe_from_table(self): Creates dataframe from tables, updates tables after changes.
 
     """
     def __init__(self, id: int, title: str, inputFolderName: str):
@@ -33,7 +33,6 @@ class Lesson:
 
     def _create_dataframe_from_table(self, tableNum) -> pd.DataFrame:
         """
-        TODO: it would be awesome if we could create table3 using only this function too.
         Description: Function to create dataframe from tables
         Parameters:
             tableNum (int) : Lesson's table number.
@@ -41,6 +40,7 @@ class Lesson:
             pd.DataFrame : Lesson's table dataframe."""
 
         # Arrange the actions to be taken in each choice.
+
         if tableNum == 1:
             # Select a table using 'tableNum' and read its xlsx files.
             df = pd.read_excel(f"{self.inputFolderPath}\\table1.xlsx", sheet_name=0)
@@ -78,16 +78,24 @@ class Lesson:
             df.iloc[1, toplamIndex] = "Toplam"
 
         if tableNum == 3:
+            # Read table2.
             df2 = pd.read_excel(f"{self.inputFolderPath}\\table2.xlsx", sheet_name=0)
+
+            # Cut the dataframe to use just its values.
             recalculatedDf2 = (df2.iloc[2:, 1:-1] * df2.iloc[0, 1:-1]) / 100
+
+            # Column 'Ders çıktı' needs to be added manually, identify the column.
             dersCiktiColumn = df2.iloc[1:, 0].to_list()
+
+            # The keys in the original table are incorrect, so they need to be added manually. Identify the key row.
             firstRow = df2.iloc[1, 1:-1].to_list()
 
-            print('_____________________________')
-            print(dersCiktiColumn)
-            df = df2
-            rowCount, colCount = len(df2), len(df2.columns)
+            # Create the third dataframe (df3) using recalculatedDf2.
+            # Column names are placeholders and should not be interpreted as actual keys.
+            # The actual keys are stored in the first row. This step improves the table's readability in Excel.
             df3 = pd.DataFrame(recalculatedDf2.values, columns=['TABLO 3'] + ['Ağırlıklı Değerlendirme'] * (len(df2.columns) - 3))
+
+            # Insert the actual keys into first row.
             df3 = pd.concat([pd.DataFrame([firstRow], columns=df3.columns), df3], ignore_index=True)
 
             if 'Toplam' in df3.columns:
@@ -98,21 +106,24 @@ class Lesson:
                 # If column doesn't exist, recursion won't happen.
                 df3['Toplam'] = df3.iloc[0:, 0:].sum(axis=1)
 
+            # Bring down the column 'Toplam'.
             toplamIndex = df3.columns.tolist().index("Toplam")
-            df3.iloc[0, toplamIndex] = None  # Üstteki başlığı boş yap
-            df3.iloc[0, toplamIndex] = "Toplam"  # Bir alt satıra taşı
+            df3.iloc[0, toplamIndex] = None
+            df3.iloc[0, toplamIndex] = "Toplam"
 
+            # If column 'Ders Çıktı' already exists, pass.
             if 'Ders Çıktı' in df3.columns:
                 pass
 
+            # If column 'Ders Çıktı' does not exist, create one and insert it into the first column.
             else:
                 df3.insert(0, 'Ders Çıktı', dersCiktiColumn)
-            print(df3.to_string())
+            # Choose df3 as the output dataframe (df).
+            df = df3
 
-
-
-
-
+        # If wrong option is chosen, assert an error.
+        else:
+            assert 1 <= tableNum <= 3, "Wrong input table number. Options are: 1,2 or 3."
 
         # Remove 'unnamed' from tables.
         df.columns = [col if "Unnamed" not in col else "" for col in df.columns]
@@ -121,41 +132,6 @@ class Lesson:
         # Rewrite the table and return the dataframe.
         resultDf.to_excel(f"{self.inputFolderPath}\\table{tableNum}.xlsx", index=False)
         return resultDf
-        
-    def _organize_directory(self, option) -> None:
-        """option 'reorganize' creates reorganized files while option 'delete' deletes initial files."""
-        if option == 'reorganize':
-            if 'table1_reorganized.xlsx' not in os.listdir(self.inputFolderPath):
-                self.tableOneDataFrame = pd.read_excel(f"{self.inputFolderPath}\\table1.xlsx", header=[0, 1])
-                self.tableTwoDataFrame = pd.read_excel(f"{self.inputFolderPath}\\table2.xlsx", header=[0, 1])
-
-            else:
-                self.tableOneDataFrame = pd.read_excel(f"{self.inputFolderPath}\\table1_reorganized.xlsx",
-                                                       header=[0, 1])
-                self.tableTwoDataFrame = pd.read_excel(f"{self.inputFolderPath}\\table2_reorganized.xlsx",
-                                                       header=[0, 1])
-        if option == 'delete':
-            if 'table1.xlsx' in os.listdir(self.inputFolderPath):
-                os.remove(f"{self.inputFolderPath}\\table1.xlsx")
-                os.remove(f"{self.inputFolderPath}\\table2.xlsx")
-
-
-
-    def _organize_table_one_and_two(self) -> None:
-        """Organizes table one and two dataframe, then rewrites table one and table two dataframe to their parent excel file."""
-        # Appends column 'İlişki Değeri' to table1's dataframe.
-        self.tableOneDataFrame['İlişki Değeri'] = self.tableOneDataFrame.iloc[1:, 1:].sum(axis=1) / (self.tableOneDataFrame.shape[1] - 1)
-
-        # Appends column 'Toplam' to table2's dataframe.
-        self.tableTwoDataFrame['Toplam'] = self.tableTwoDataFrame.iloc[2:, 1:].sum(axis=1)
-
-        self.tableOneDataFrame.to_excel(f"{self.inputFolderPath}\\table1_reorganized.xlsx", index=True)
-        self.tableTwoDataFrame.to_excel(f"{self.inputFolderPath}\\table2_reorganized.xlsx", index=True)
-
-
-    def _create_table_three_dataframe(self) -> None:
-        ...
-
 
 
     def check_tables(self) -> None:
