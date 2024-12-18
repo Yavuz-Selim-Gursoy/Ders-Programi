@@ -11,6 +11,7 @@ DATA_DIR = f'{ROOT_DIR}\\data'
 class Lesson:
     """
     Description: Lesson class.
+
     Attributes:
         id (int): Lesson id.
         title (str) : Lesson title.
@@ -18,9 +19,12 @@ class Lesson:
         tableOneDataFrame (pd.DataFrame) : Lesson's table one dataframe.
         tableTwoDataFrame (pd.DataFrame) : Lesson's table two dataframe.
         tableThreeDataFrame (pd.DataFrame) : Lesson's table three dataframe.
+        tableGrades (pd.DataFrame) : Lesson's grade table dataframe.
+
     Member Functions:
-        TODO: setter and getter functions
-        _create_dataframe_from_table(self): Creates dataframe from tables, updates tables after changes.
+        Utils:
+            TODO: setter and getter functions
+            _create_dataframe_from_table(self: Lesson, tableNum:int) -> pd.Dataframe: Creates dataframe from tables (selects the table using 'tableNum'), updates tables after changes.
 
     """
     def __init__(self, id: int, title: str, inputFolderName: str):
@@ -30,14 +34,16 @@ class Lesson:
         self.tableOneDataFrame = self._create_dataframe_from_table(1)
         self.tableTwoDataFrame = self._create_dataframe_from_table(2)
         self.tableThreeDataFrame = self._create_dataframe_from_table(3)
+        self.tableGrades = self._create_dataframe_from_table(0)
 
     def _create_dataframe_from_table(self, tableNum) -> pd.DataFrame:
         """
-        Description: Function to create dataframe from tables
+        Description: Function to create dataframe from tables.
         Parameters:
             tableNum (int) : Lesson's table number.
         Returns:
-            pd.DataFrame : Lesson's table dataframe."""
+            pd.DataFrame : Lesson's table dataframe.
+        """
 
         # Arrange the actions to be taken in each choice.
 
@@ -61,8 +67,8 @@ class Lesson:
             # If there are fewer than 3 tasks in the season, assert ValueError.
             assert not len(df.columns) - 2 < 3, "Table2 must have at least 3 columns."
 
-            # If the grading percentages do not sum up to 100, assert ValueError.
-            assert not df.iloc[0, 1:].sum() != 100, "Grading percentages must sum to 100."
+            # If the grading weights do not sum up to 100, assert ValueError.
+            assert not df.iloc[0, 1:].sum() != 100, "Grading weights must sum to 100."
 
             # Calculate column 'Toplam'
             if 'Toplam' in df.columns:
@@ -121,16 +127,42 @@ class Lesson:
             # Choose df3 as the output dataframe (df).
             df = df3
 
+        if tableNum == 0:
+            # Read the grades table.
+            df = pd.read_excel(f"{self.inputFolderPath}\\grades.xlsx", sheet_name=0)
+
+            # Read table2 and crop the values.
+            df2 = pd.read_excel(f"{self.inputFolderPath}\\table2.xlsx", sheet_name=0)
+            df2_cropped = df2.iloc[2:, 1:-1]
+
+            # Identify the weights from table2.
+            weights = df2.iloc[0, 1:-1].to_list()
+
+            # Calculate the weighted scores using weights and grades.
+            weighted_scores = df.iloc[:, 1:].mul(weights, axis=1) / 100
+
+            # Create the column 'Ortalama' and insert the sum of the row's weighted scores.
+            df["Ortalama"] = weighted_scores.sum(axis=1)
+
+            # If table2 and grades table column counts doesn't match, assert an error.
+            assert len(df2_cropped.columns) == (len(df.columns) - 2), "Table2 and TableGrades column counts must be the same."
+
         # If wrong option is chosen, assert an error.
         else:
-            assert 1 <= tableNum <= 3, "Wrong input table number. Options are: 1,2 or 3."
+            assert 0 <= tableNum <= 3, "Wrong input table number. Options are: 0, 1, 2 or 3."
 
         # Remove 'unnamed' from tables.
         df.columns = [col if "Unnamed" not in col else "" for col in df.columns]
         resultDf = df
 
         # Rewrite the table and return the dataframe.
-        resultDf.to_excel(f"{self.inputFolderPath}\\table{tableNum}.xlsx", index=False)
+        # If tableNum is 0 do not rewrite dataframe to the table.
+        if tableNum != 0:
+            resultDf.to_excel(f"{self.inputFolderPath}\\table{tableNum}.xlsx", index=False)
+
+        elif tableNum == 0:
+            resultDf.to_excel(f"{self.inputFolderPath}\\grades.xlsx", index=False)
+
         return resultDf
 
 
@@ -147,6 +179,8 @@ class Student:
     """
     Description: Student class.
     Attributes:
+        id (int): Student id.
+
     Member Functions:
     """
 
