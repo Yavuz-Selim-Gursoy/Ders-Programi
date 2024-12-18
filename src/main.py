@@ -13,30 +13,31 @@ class Lesson:
     Description: Lesson class.
 
     Attributes:
-        id (int): Lesson id.
         title (str) : Lesson title.
-        inputFolderName (str) : Lesson folder name.
+        inputFolderPath (str) : Lesson folder name.
         tableOneDataFrame (pd.DataFrame) : Lesson's table one dataframe.
         tableTwoDataFrame (pd.DataFrame) : Lesson's table two dataframe.
         tableThreeDataFrame (pd.DataFrame) : Lesson's table three dataframe.
-        tableGrades (pd.DataFrame) : Lesson's grade table dataframe.
+        tableGradesDataFrame (pd.DataFrame) : Lesson's grade table dataframe.
+        lessonStudents (list) : Lesson's student list.
 
     Member Functions:
         Utils:
             TODO: setter and getter functions
             _create_dataframe_from_table(self: Lesson, tableNum:int) -> pd.Dataframe: Creates dataframe from tables (selects the table using 'tableNum'), updates tables after changes.
-
+            _check_tables(self: Lesson) -> None: Prints dataframes on console.
     """
-    def __init__(self, id: int, title: str, inputFolderName: str):
-        self.id = id
+    def __init__(self, title: str):
         self.title = title
-        self.inputFolderPath = f'{DATA_DIR}\\lessons\\{inputFolderName}'
-        self.tableOneDataFrame = self._create_dataframe_from_table(1)
-        self.tableTwoDataFrame = self._create_dataframe_from_table(2)
-        self.tableThreeDataFrame = self._create_dataframe_from_table(3)
-        self.tableGrades = self._create_dataframe_from_table(0)
+        self.inputFolderPath = f'{DATA_DIR}\\lessons\\{self.title}'
+        self.tableOneDataFrame = self._create_df_from_lesson_table(1)
+        self.tableTwoDataFrame = self._create_df_from_lesson_table(2)
+        self.tableThreeDataFrame = self._create_df_from_lesson_table(3)
+        self.tableGradesDataFrame = self._create_df_from_lesson_table(0)
+        self.lessonStudents = self.tableGradesDataFrame.iloc[0:, 0].to_list()
 
-    def _create_dataframe_from_table(self, tableNum) -> pd.DataFrame:
+
+    def _create_df_from_lesson_table(self, tableNum: int) -> pd.DataFrame:
         """
         Description: Function to create dataframe from tables.
         Parameters:
@@ -131,21 +132,25 @@ class Lesson:
             # Read the grades table.
             df = pd.read_excel(f"{self.inputFolderPath}\\grades.xlsx", sheet_name=0)
 
-            # Read table2 and crop the values.
-            df2 = pd.read_excel(f"{self.inputFolderPath}\\table2.xlsx", sheet_name=0)
-            df2_cropped = df2.iloc[2:, 1:-1]
+            if 'Ortalama' not in df.columns:
+                # Read table2 and crop the values.
+                df2 = pd.read_excel(f"{self.inputFolderPath}\\table2.xlsx", sheet_name=0)
+                df2_cropped = df2.iloc[2:, 1:-1]
 
-            # Identify the weights from table2.
-            weights = df2.iloc[0, 1:-1].to_list()
+                # Identify the weights from table2.
+                weights = df2.iloc[0, 1:-1].to_list()
 
-            # Calculate the weighted scores using weights and grades.
-            weighted_scores = df.iloc[:, 1:].mul(weights, axis=1) / 100
+                # Calculate the weighted scores using weights and grades.
+                weighted_scores = df.iloc[:, 1:].mul(weights, axis=1) / 100
 
-            # Create the column 'Ortalama' and insert the sum of the row's weighted scores.
-            df["Ortalama"] = weighted_scores.sum(axis=1)
+                # Create the column 'Ortalama' and insert the sum of the row's weighted scores.
+                df["Ortalama"] = weighted_scores.sum(axis=1)
 
-            # If table2 and grades table column counts doesn't match, assert an error.
-            assert len(df2_cropped.columns) == (len(df.columns) - 2), "Table2 and TableGrades column counts must be the same."
+                # If table2 and grades table column counts doesn't match, assert an error.
+                assert len(df2_cropped.columns) == (len(df.columns) - 2), "Table2 and TableGrades column counts must be the same."
+
+            else:
+                pass
 
         # If wrong option is chosen, assert an error.
         else:
@@ -156,24 +161,28 @@ class Lesson:
         resultDf = df
 
         # Rewrite the table and return the dataframe.
-        # If tableNum is 0 do not rewrite dataframe to the table.
+        # If tableNum is 0, change its filename to grades.xlsx.
         if tableNum != 0:
             resultDf.to_excel(f"{self.inputFolderPath}\\table{tableNum}.xlsx", index=False)
 
         elif tableNum == 0:
             resultDf.to_excel(f"{self.inputFolderPath}\\grades.xlsx", index=False)
-
+        
         return resultDf
 
 
-    def check_tables(self) -> None:
-        print(self.tableOneDataFrame.iloc[1:, 1:].sum(axis=1))
-        print("Tablo1: \n", self.tableOneDataFrame.iloc[0:, 0:])
-        print("Tablo2: \n", self.tableTwoDataFrame.iloc[0:, 0:])
+    def _check_tables(self) -> None:
+        print(self.tableOneDataFrame.to_string())
+        print('-' * 130)
+        print(self.tableTwoDataFrame.to_string())
+        print('-' * 130)
+        print(self.tableThreeDataFrame.to_string())
+        print('-' * 130)
+        print(self.tableGradesDataFrame.to_string())
 
 
 
-lesson1 = Lesson(220, 'BilgisayarMimarisi', 'BilgisayarMimarisi')
+
 
 class Student:
     """
@@ -183,6 +192,7 @@ class Student:
 
     Member Functions:
     """
-
+lesson1 = Lesson('BilgisayarMimarisi')
+lesson1._check_tables()
 
 
