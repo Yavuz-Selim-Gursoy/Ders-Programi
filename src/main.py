@@ -2,7 +2,6 @@
 import pandas as pd
 import os
 from pathlib import Path
-import numpy as np
 
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 DATA_DIR = f'{ROOT_DIR}\\data'
@@ -280,8 +279,6 @@ class Student:
             columnMaxDf4 = [int(x * y) for x, y in zip(columnToplamDf3Rounded, hundredsList)]
 
             # Create the dataframe '4'.
-            print(recalculatedDf3.to_string())
-            print(recalculatedDfGrades.columns.to_list())
             df4 = pd.DataFrame(recalculatedDf3.values, columns=recalculatedDfGrades.columns.to_list())
 
             # For every studentID in 'grades' dataframe,
@@ -308,47 +305,47 @@ class Student:
 
 
 
-            # Get dataframe 1 and sanitize it.
-            df1 = lesson.tableOneDataFrame
-            recalculatedDf1 = df1.iloc[1:, 1:-1]
+                    # Get dataframe 1 and sanitize it.
+                    df1 = lesson.tableOneDataFrame
+                    recalculatedDf1 = df1.iloc[1:, 1:-1]
 
-            # Get column 'Başarı' from dataframe 4.
-            columnBasari = tableFourDataFrame["Başarı"].to_list()
+                    # Get column 'Başarı' from dataframe 4.
+                    columnBasari = tableFourDataFrame["Başarı"].to_list()
 
-            # Get column 'Prg Çıktı' from dataframe 1.
-            columnPrgCikti = df1.iloc[1:, 0].to_list()
+                    # Get column 'Prg Çıktı' from dataframe 1.
+                    columnPrgCikti = df1.iloc[1:, 0].to_list()
 
-            # Initialize dataframe 5 using dataframe 1's values.
-            df5 = pd.DataFrame(recalculatedDf1.values, columns=columnBasari)
+                    # Initialize dataframe 5 using dataframe 1's values.
+                    df5 = pd.DataFrame(recalculatedDf1.values, columns=columnBasari)
 
-            # Multiply every element with column 'Başarı' from dataframe 4.
-            tableFiveDataFrame = df5.mul(columnBasari, axis=1)
+                    # Multiply every element with column 'Başarı' from dataframe 4.
+                    tableFiveDataFrame = df5.mul(columnBasari, axis=1)
 
-            # Create a phantom dataframe where every single grade is maximum.
-            hundredsList = [100] * len(columnBasari)
-            maxGradedDf5 = df5.mul(hundredsList, axis=1)
-            maxGradedDf5["MAXBASARI"] = maxGradedDf5.sum(axis=1)
+                    # Create a phantom dataframe where every single grade is maximum.
+                    hundredsList = [100] * len(columnBasari)
+                    maxGradedDf5 = df5.mul(hundredsList, axis=1)
+                    maxGradedDf5["MAXBASARI"] = maxGradedDf5.sum(axis=1)
 
-            # Calculate total weighted grades for student.
-            columnTotalBasariDf5 = tableFiveDataFrame.sum(axis=1).to_list()
+                    # Calculate total weighted grades for student.
+                    columnTotalBasariDf5 = tableFiveDataFrame.sum(axis=1).to_list()
 
-            # Round total weighted grades and insert them into another phantom dataframe.
-            columnTotalBasariDf5Rounded = [round(i, 3) for i in columnTotalBasariDf5]
-            df5["TOTALBASARI"] = columnTotalBasariDf5Rounded
+                    # Round total weighted grades and insert them into another phantom dataframe.
+                    columnTotalBasariDf5Rounded = [round(i, 3) for i in columnTotalBasariDf5]
+                    df5["TOTALBASARI"] = columnTotalBasariDf5Rounded
 
-            # Insert column 'Prg Çıktı' to dataframe 5.
-            tableFiveDataFrame.insert(0, 'Prg Çıktı', columnPrgCikti)
+                    # Insert column 'Prg Çıktı' to dataframe 5.
+                    tableFiveDataFrame.insert(0, 'Prg Çıktı', columnPrgCikti)
 
-            # Calculate column 'Başarı Oranı' using phantom dataframe df5's 'TOTALBASARI' and
-            # phantom dataframe maxGradedDf5's 'MAXBASARI' columns, and insert it into the actual tableFiveDataFrame.
-            tableFiveDataFrame["Başarı Oranı"] = round((df5["TOTALBASARI"] / maxGradedDf5["MAXBASARI"]) * 100, 1)
+                    # Calculate column 'Başarı Oranı' using phantom dataframe df5's 'TOTALBASARI' and
+                    # phantom dataframe maxGradedDf5's 'MAXBASARI' columns, and insert it into the actual tableFiveDataFrame.
+                    tableFiveDataFrame["Başarı Oranı"] = round((df5["TOTALBASARI"] / maxGradedDf5["MAXBASARI"]) * 100, 1)
 
-            # Write dataframes into their excel tables.
-            if 'table4.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
-                tableFourDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table4.xlsx', index=False)
+                    # Write dataframes into their excel tables.
+                    if 'table4.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
+                        tableFourDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table4.xlsx', index=False)
 
-            if 'table5.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
-                tableFiveDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table5.xlsx', index=False)
+                    if 'table5.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
+                        tableFiveDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table5.xlsx', index=False)
 
 
 # ========================== Main Functions
