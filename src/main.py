@@ -6,7 +6,8 @@ import numpy as np
 
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 DATA_DIR = f'{ROOT_DIR}\\data'
-LESSONS_NAMES = os.listdir(f'{DATA_DIR}\\lessons')
+LESSON_NAMES = os.listdir(f'{DATA_DIR}\\lessons')
+ALL_LESSON_OBJECTS = list()
 # ==========================
 
 # ========================== Main Classes
@@ -26,8 +27,9 @@ class Lesson:
     Member Functions:
         Utils:
             TODO: setter and getter functions
-            _create_dataframe_from_table(self: Lesson, tableNum:int) -> pd.Dataframe: Creates dataframe from tables (selects the table using 'tableNum'), updates tables after changes.
-            _check_tables(self: Lesson) -> None: Prints dataframes on console.
+            _create_dataframe_from_table (self: Lesson, tableNum:int) -> pd.Dataframe: Creates dataframe from tables (selects the table using 'tableNum'), updates tables after changes.
+            _check_tables (self: Lesson) -> None: Prints dataframes on console.
+            _create_folder_for_students (self: Lesson) -> None: Creates folder for students.
     """
 
 
@@ -217,16 +219,20 @@ class Student:
         lessons: Student lessons.
     Member Functions:
         TODO: setter and getter functions
+        _find_lessons (self: Student) -> list: Finds registered lessons for every student.
+        _create_df_from_student_table(self: Student) -> None: Creates dataframe from tables and writes them in an excel file.
     """
 
     def __init__(self, id: int):
         self.id = id
         self.folderPath = f'{DATA_DIR}\\students\\{self.id}'
-        self.allLessonObjects = [Lesson(lessonTitle) for lessonTitle in LESSONS_NAMES]
+        self.allLessonObjects = ALL_LESSON_OBJECTS
         self.lessons = self._find_lessons()
+        self._create_df_from_student_table()
+
 
     def _find_lessons(self) -> list:
-        """Finds active lessons that is available for the student."""
+        """Finds registered lessons for the student."""
 
         lessons = list()
         # For every lesson in all lessons,
@@ -243,119 +249,120 @@ class Student:
         """
         Description: Creates dataframe from table.
         Parameters:
-            tableNum (int): Table number.
+            self (Student): Student object.
         Returns:
             None
-            """
+        """
 
         # For every lesson in student's lessons list,
         for lesson in self.lessons:
 
-            # If lesson title is not in the student's own folder,
-            if lesson.title not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\'):
-
-                # Create a folder for the lesson
+            # Create a folder for the lesson.
+            if lesson.title not in os.listdir(f"{DATA_DIR}\\students\\{self.id}\\"):
                 os.mkdir(f"{DATA_DIR}\\students\\{self.id}\\{lesson.title}")
 
+            # Get dataframes '3' and 'grades',
+            df3 = lesson.tableThreeDataFrame
+            dfGrades = lesson.tableGradesDataFrame
 
+            # Cut the dataframes to use just its values.
+            recalculatedDf3 = df3.iloc[1:, 1:-1]
+            recalculatedDfGrades = dfGrades.iloc[:, 1:-1]
 
-                # Get dataframes '3' and 'grades',
-                df3 = lesson.tableThreeDataFrame
-                dfGrades = lesson.tableGradesDataFrame
+            # Get column 'TOPLAM' from dataframe 3 to calculate the 'MAX' column.
+            # Column 'Ders çıktı' needs to be added manually, get the column from dataframe 3.
+            columnDersCikti = df3.iloc[1:, 0].to_list()
+            columnToplamDf3 = df3.iloc[1:, -1]
+            columnToplamDf3Rounded = [round(num, 3) for num in columnToplamDf3]
 
-                # Cut the dataframes to use just its values.
-                recalculatedDf3 = df3.iloc[1:, 1:-1]
-                recalculatedDfGrades = dfGrades.iloc[:, 1:-1]
+            # Create another list that is filled with hundreds using the length of columnMax
+            hundredsList = [100] * len(columnToplamDf3Rounded)
+            columnMaxDf4 = [int(x * y) for x, y in zip(columnToplamDf3Rounded, hundredsList)]
 
-                # Get column 'TOPLAM' from dataframe 3 to calculate the 'MAX' column.
-                # Column 'Ders çıktı' needs to be added manually, get the column from dataframe 3.
-                columnDersCikti = df3.iloc[1:, 0].to_list()
-                columnToplamDf3 = df3.iloc[1:, -1]
-                columnToplamDf3Rounded = [round(num, 3) for num in columnToplamDf3]
+            # Create the dataframe '4'.
+            print(recalculatedDf3.to_string())
+            print(recalculatedDfGrades.columns.to_list())
+            df4 = pd.DataFrame(recalculatedDf3.values, columns=recalculatedDfGrades.columns.to_list())
 
-                # Create another list that is filled with hundreds using the length of columnMax
-                hundredsList = [100] * len(columnToplamDf3Rounded)
-                columnMaxDf4 = [int(x * y) for x, y in zip(columnToplamDf3Rounded, hundredsList)]
+            # For every studentID in 'grades' dataframe,
+            for studentID in dfGrades.iloc[:, 0].to_list():
 
-                # Create the dataframe '4'.
-                df4 = pd.DataFrame(recalculatedDf3.values, columns=recalculatedDfGrades.columns.to_list())
+                # If studentID matches with current student,
+                if studentID == self.id:
 
-                # For every studentID in 'grades' dataframe,
-                for studentID in dfGrades.iloc[:, 0].to_list():
+                    # Find the student's row index,
+                    # Put the index into a buffer list, then get the index using [0] from the buffer list.
+                    rowIndex = dfGrades.index[dfGrades["Öğrenci"] == self.id].to_list()[0]
 
-                    # If studentID matches with current student,
-                    if studentID == self.id:
+                    # Using the rowIndex, find the current student's grades and insert them into a list.
+                    # Multiply every single grade with their weight, change the datatype to integer.
+                    studentGrades = recalculatedDfGrades.iloc[rowIndex, :].to_list()
+                    tableFourDataFrame = df4.mul(studentGrades, axis=1)
+                    tableFourDataFrame = tableFourDataFrame.astype(int)
 
-                        # Find the student's row index,
-                        # Put the index into a buffer list, then get the index using [0] from the buffer list.
-                        rowIndex = dfGrades.index[dfGrades["Öğrenci"] == self.id].to_list()[0]
-
-                        # Using the rowIndex, find the current student's grades and insert them into a list.
-                        # Multiply every single grade with their weight, change the datatype to integer.
-                        studentGrades = recalculatedDfGrades.iloc[rowIndex, :].to_list()
-                        tableFourDataFrame = df4.mul(studentGrades, axis=1)
-                        tableFourDataFrame = tableFourDataFrame.astype(int)
-
-                        # Create the column 'TOPLAM'.
-                        tableFourDataFrame["TOPLAM"] = tableFourDataFrame.sum(axis=1)
-                        tableFourDataFrame["MAX"] = columnMaxDf4
-                        tableFourDataFrame["Başarı"] = round((tableFourDataFrame["TOPLAM"] / tableFourDataFrame["MAX"]) * 100, 1)
-                        tableFourDataFrame.insert(0, 'Ders Çıktı', columnDersCikti)
-
-
-
-
-                # Get dataframe 1 and sanitize it.
-                df1 = lesson.tableOneDataFrame
-                recalculatedDf1 = df1.iloc[1:, 1:-1]
-
-                # Get column 'Başarı' from dataframe 4.
-                columnBasari = tableFourDataFrame["Başarı"].to_list()
-
-                # Get column 'Prg Çıktı' from dataframe 1.
-                columnPrgCikti = df1.iloc[1:, 0].to_list()
-
-                # Initialize dataframe 5 using dataframe 1's values.
-                df5 = pd.DataFrame(recalculatedDf1.values, columns=columnBasari)
-
-                # Multiply every element with column 'Başarı' from dataframe 4.
-                tableFiveDataFrame = df5.mul(columnBasari, axis=1)
-
-                # Create a phantom dataframe where every single grade is maximum.
-                hundredsList = [100] * len(columnBasari)
-                maxGradedDf5 = df5.mul(hundredsList, axis=1)
-                maxGradedDf5["MAXBASARI"] = maxGradedDf5.sum(axis=1)
-
-                # Calculate total weighted grades for student.
-                columnTotalBasariDf5 = tableFiveDataFrame.sum(axis=1).to_list()
-
-                # Round total weighted grades and insert them into another phantom dataframe.
-                columnTotalBasariDf5Rounded = [round(i, 3) for i in columnTotalBasariDf5]
-                df5["TOTALBASARI"] = columnTotalBasariDf5Rounded
-
-                # Insert column 'Prg Çıktı' to dataframe 5.
-                tableFiveDataFrame.insert(0, 'Prg Çıktı', columnPrgCikti)
-
-                # Calculate column 'Başarı Oranı' using phantom dataframe df5's 'TOTALBASARI' and
-                # phantom dataframe maxGradedDf5's 'MAXBASARI' columns, and insert it into the actual tableFiveDataFrame.
-                tableFiveDataFrame["Başarı Oranı"] = round((df5["TOTALBASARI"] / maxGradedDf5["MAXBASARI"]) * 100, 1)
+                    # Create the column 'TOPLAM'.
+                    tableFourDataFrame["TOPLAM"] = tableFourDataFrame.sum(axis=1)
+                    tableFourDataFrame["MAX"] = columnMaxDf4
+                    tableFourDataFrame["Başarı"] = round((tableFourDataFrame["TOPLAM"] / tableFourDataFrame["MAX"]) * 100, 1)
+                    tableFourDataFrame.insert(0, 'Ders Çıktı', columnDersCikti)
 
 
 
-                # Write dataframes into their excel tables.
+            # Get dataframe 1 and sanitize it.
+            df1 = lesson.tableOneDataFrame
+            recalculatedDf1 = df1.iloc[1:, 1:-1]
+
+            # Get column 'Başarı' from dataframe 4.
+            columnBasari = tableFourDataFrame["Başarı"].to_list()
+
+            # Get column 'Prg Çıktı' from dataframe 1.
+            columnPrgCikti = df1.iloc[1:, 0].to_list()
+
+            # Initialize dataframe 5 using dataframe 1's values.
+            df5 = pd.DataFrame(recalculatedDf1.values, columns=columnBasari)
+
+            # Multiply every element with column 'Başarı' from dataframe 4.
+            tableFiveDataFrame = df5.mul(columnBasari, axis=1)
+
+            # Create a phantom dataframe where every single grade is maximum.
+            hundredsList = [100] * len(columnBasari)
+            maxGradedDf5 = df5.mul(hundredsList, axis=1)
+            maxGradedDf5["MAXBASARI"] = maxGradedDf5.sum(axis=1)
+
+            # Calculate total weighted grades for student.
+            columnTotalBasariDf5 = tableFiveDataFrame.sum(axis=1).to_list()
+
+            # Round total weighted grades and insert them into another phantom dataframe.
+            columnTotalBasariDf5Rounded = [round(i, 3) for i in columnTotalBasariDf5]
+            df5["TOTALBASARI"] = columnTotalBasariDf5Rounded
+
+            # Insert column 'Prg Çıktı' to dataframe 5.
+            tableFiveDataFrame.insert(0, 'Prg Çıktı', columnPrgCikti)
+
+            # Calculate column 'Başarı Oranı' using phantom dataframe df5's 'TOTALBASARI' and
+            # phantom dataframe maxGradedDf5's 'MAXBASARI' columns, and insert it into the actual tableFiveDataFrame.
+            tableFiveDataFrame["Başarı Oranı"] = round((df5["TOTALBASARI"] / maxGradedDf5["MAXBASARI"]) * 100, 1)
+
+            # Write dataframes into their excel tables.
+            if 'table4.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
                 tableFourDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table4.xlsx', index=False)
+
+            if 'table5.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
                 tableFiveDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table5.xlsx', index=False)
 
 
-    def _check_tables(self) -> None:
-        for lesson in self.lessons:
-            ...
+# ========================== Main Functions
+if __name__ == '__main__':
+    # For every lesson title in LESSON_NAMES,
+    for lessonTitle in LESSON_NAMES:
 
+        # Create a 'Lesson' object to represent them and insert it into ALL_LESSON_OBJECTS.
+        lessonObj = Lesson(lessonTitle)
+        ALL_LESSON_OBJECTS.append(lessonObj)
 
+    # After the 'Lesson' class is called, the 'students' folder will be filled with all students.
+    # For every student folder in students folder,
+    for studentID in os.listdir(f'{DATA_DIR}\\students'):
 
-randomStudent = Student(220501003)
-
-randomStudent._create_df_from_student_table()
-
-
-
+        # Create a 'Student' object to represent them.
+        studentObj = Student(int(studentID))
