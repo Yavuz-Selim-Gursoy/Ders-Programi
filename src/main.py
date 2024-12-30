@@ -280,8 +280,6 @@ class Student:
             columnMaxDf4 = [int(x * y) for x, y in zip(columnToplamDf3Rounded, hundredsList)]
 
             # Create the dataframe '4'.
-            print(recalculatedDf3.to_string())
-            print(recalculatedDfGrades.columns.to_list())
             df4 = pd.DataFrame(recalculatedDf3.values, columns=recalculatedDfGrades.columns.to_list())
 
             # For every studentID in 'grades' dataframe,
@@ -861,7 +859,7 @@ class StudentDataAccessor:
         Returns the entire table4 dataframe for a given lesson.
         """
         file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table4.xlsx'
-        #print(f"Checking for file: {file_path}")
+
         if os.path.exists(file_path):
             return pd.read_excel(file_path)
         else:
