@@ -280,8 +280,6 @@ class Student:
             columnMaxDf4 = [int(x * y) for x, y in zip(columnToplamDf3Rounded, hundredsList)]
 
             # Create the dataframe '4'.
-            print(recalculatedDf3.to_string())
-            print(recalculatedDfGrades.columns.to_list())
             df4 = pd.DataFrame(recalculatedDf3.values, columns=recalculatedDfGrades.columns.to_list())
 
             # For every studentID in 'grades' dataframe,
@@ -349,6 +347,573 @@ class Student:
 
             if 'table5.xlsx' not in os.listdir(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\'):
                 tableFiveDataFrame.to_excel(f'{DATA_DIR}\\students\\{self.id}\\{lesson.title}\\table5.xlsx', index=False)
+
+
+# ============================ Setter Functions
+class LessonDataMutator:
+    """
+    Description: Provides setter functions to update Lesson instances tables
+    """
+    def __init__(self, lesson_instance):
+        """
+        lesson_instance must be an object of the Lesson class.
+        """
+        self._lesson = lesson_instance
+
+    def set_table_one(self, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire table1 dataframe
+        """
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError('new_table must be a pandas dataframe')
+        self._lesson.tableOneDataFrame = new_table
+
+    def set_table_one_column(self, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in the table1 dataframe
+
+        Parametres:
+            column_name (str): The name of the Index
+            new_column (pd.Series): The new values for the column
+
+        Returns:
+             None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Checks column Index
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table1.")
+
+        # Raise the error if came the different values
+        if not isinstance(new_column, pd.Series):
+            raise ValueError('new_column must be a pandas seires')
+
+        # Update the row
+        table[column_name] = new_column
+
+    def set_table_one_row(self, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in the table1 dataframe.
+
+        Parameters:
+            row_index (int): Index of the row to update.
+            new_row (pd.Series): New values for the row.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Checks row index
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table1.")
+
+        # Checks Type
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+
+        # Column compatibility check
+        if not all(new_row.index == table.columns):
+            raise ValueError("new_row indices must match table columns.")
+
+        # Update the row
+        table.iloc[row_index] = new_row
+
+    def set_table_one_value(self, column_name: str, row_index: int, new_value) -> None:
+        """
+        Updates a specific value in a column in table1 dataframe.
+
+        Parameters:
+            column_name (str): The column where the value is to be updated.
+            row_index (int): The row index of the value to be updated.
+            new_value: The new value to set.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Check the presence of the column
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table1")
+
+        # Check if the row index is valid
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table1")
+
+        # Update value
+        table.at[row_index, column_name] = new_value
+
+    #--------------------------
+    def set_table_two(self, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire table2 dataframe.
+        """
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError("new_table must be a pandas DataFrame.")
+        self._lesson.tableTwoDataFrame = new_table
+
+    def set_table_two_column(self, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in the table2 dataframe
+
+        Parametres:
+            column_name (str): The name of the Index
+            new_column (pd.Series): The new values for the column
+
+        Returns:
+             None
+        """
+        table = self._lesson.tableTwoDataFrame
+
+        # Checks column Index
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table2.")
+
+        # Raise the error if came the different values
+        if not isinstance(new_column, pd.Series):
+            raise ValueError('new_column must be a pandas seires')
+
+        # Update the row
+        table[column_name] = new_column
+
+    def set_table_two_row(self, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in the table2 dataframe.
+
+        Parameters:
+            row_index (int): Index of the row to update.
+            new_row (pd.Series): New values for the row.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Checks row index
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table2.")
+
+        # Checks Type
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+
+        # Column compatibility check
+        if not all(new_row.index == table.columns):
+            raise ValueError("new_row indices must match table columns.")
+
+        # Update the row
+        table.iloc[row_index] = new_row
+
+    def set_table_two_value(self, column_name: str, row_index: int, new_value) -> None:
+        """
+        Updates a specific value in a column in table2 dataframe.
+
+        Parameters:
+            column_name (str): The column where the value is to be updated.
+            row_index (int): The row index of the value to be updated.
+            new_value: The new value to set.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Check the presence of the column
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table2")
+
+        # Check if the row index is valid
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table2")
+
+        # Update value
+        table.at[row_index, column_name] = new_value
+
+    #--------------------------
+    def set_table_three(self, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire table3 dataframe.
+        """
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError("new_table must be a pandas DataFrame.")
+        self._lesson.tableTwoDataFrame = new_table
+
+    def set_table_three_column(self, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in the table3 dataframe
+
+        Parametres:
+            column_name (str): The name of the Index
+            new_column (pd.Series): The new values for the column
+
+        Returns:
+             None
+        """
+        table = self._lesson.tableTwoDataFrame
+
+        # Checks column Index
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table3.")
+
+        # Raise the error if came the different values
+        if not isinstance(new_column, pd.Series):
+            raise ValueError('new_column must be a pandas seires')
+
+        # Update the row
+        table[column_name] = new_column
+
+    def set_table_three_row(self, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in the table3 dataframe.
+
+        Parameters:
+            row_index (int): Index of the row to update.
+            new_row (pd.Series): New values for the row.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Checks row index
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table3.")
+
+        # Checks Type
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+
+        # Column compatibility check
+        if not all(new_row.index == table.columns):
+            raise ValueError("new_row indices must match table columns.")
+
+        # Update the row
+        table.iloc[row_index] = new_row
+
+    def set_table_three_value(self, column_name: str, row_index: int, new_value) -> None:
+        """
+        Updates a specific value in a column in table3 dataframe.
+
+        Parameters:
+            column_name (str): The column where the value is to be updated.
+            row_index (int): The row index of the value to be updated.
+            new_value: The new value to set.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Check the presence of the column
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table3")
+
+        # Check if the row index is valid
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table3")
+
+        # Update value
+        table.at[row_index, column_name] = new_value
+
+    #--------------------------
+    def set_table_grades(self, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire grades table dataframe.
+        """
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError("new_table must be a pandas DataFrame.")
+        self._lesson.tableTwoDataFrame = new_table
+
+    def set_table_grades_column(self, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in the grades table dataframe
+
+        Parametres:
+            column_name (str): The name of the Index
+            new_column (pd.Series): The new values for the column
+
+        Returns:
+             None
+        """
+        table = self._lesson.tableTwoDataFrame
+
+        # Checks column Index
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in TableGrades.")
+
+        # Raise the error if came the different values
+        if not isinstance(new_column, pd.Series):
+            raise ValueError('new_column must be a pandas seires')
+
+        # Update the row
+        table[column_name] = new_column
+
+    def set_table_grades_row(self, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in the grades table dataframe.
+
+        Parameters:
+            row_index (int): Index of the row to update.
+            new_row (pd.Series): New values for the row.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Checks row index
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for TableGrades.")
+
+        # Checks Type
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+
+        # Column compatibility check
+        if not all(new_row.index == table.columns):
+            raise ValueError("new_row indices must match table columns.")
+
+        # Update the row
+        table.iloc[row_index] = new_row
+
+    def set_table_grades_value(self, column_name: str, row_index: int, new_value) -> None:
+        """
+        Updates a specific value in a column in grades table dataframe.
+
+        Parameters:
+            column_name (str): The column where the value is to be updated.
+            row_index (int): The row index of the value to be updated.
+            new_value: The new value to set.
+
+        Returns:
+            None
+        """
+        table = self._lesson.tableOneDataFrame
+
+        # Check the presence of the column
+        if column_name not in table.columns:
+            raise ValueError(f"Column '{column_name}' not found in TableGrades ")
+
+        # Check if the row index is valid
+        if not (0 <= row_index < len(table)):
+            raise IndexError(f"Row index '{row_index}' is out of range for TableGrades")
+
+        # Update value
+        table.at[row_index, column_name] = new_value
+
+
+class StudentDataMutator:
+    """
+    Description: Provides setter functions to update Student instances' table4 and table5.
+    """
+
+    def __init__(self, student_instance):
+        """
+        student_instance must be an object of the Student class.
+        """
+        self._student = student_instance
+
+    def set_table4(self, lesson_title: str, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire table4 dataframe for a given lesson.
+        """
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table4.xlsx'
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError("new_table must be a pandas DataFrame.")
+        new_table.to_excel(file_path, index=False)
+
+    def set_table4_column(self, lesson_title: str, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in table4 for a given lesson.
+        """
+        table4 = StudentDataAccessor(self._student).get_table4(lesson_title)
+        if column_name not in table4.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table4 for lesson '{lesson_title}'.")
+        if not isinstance(new_column, pd.Series):
+            raise ValueError("new_column must be a pandas Series.")
+        table4[column_name] = new_column
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table4.xlsx'
+        table4.to_excel(file_path, index=False)
+
+    def set_table4_row(self, lesson_title: str, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in table4 for a given lesson.
+        """
+        table4 = StudentDataAccessor(self._student).get_table4(lesson_title)
+        if not 0 <= row_index < len(table4):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table4 in lesson '{lesson_title}'.")
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+        table4.iloc[row_index] = new_row
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table4.xlsx'
+        table4.to_excel(file_path, index=False)
+
+    def set_table5(self, lesson_title: str, new_table: pd.DataFrame) -> None:
+        """
+        Updates the entire table5 dataframe for a given lesson.
+        """
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table5.xlsx'
+        if not isinstance(new_table, pd.DataFrame):
+            raise ValueError("new_table must be a pandas DataFrame.")
+        new_table.to_excel(file_path, index=False)
+
+    def set_table5_column(self, lesson_title: str, column_name: str, new_column: pd.Series) -> None:
+        """
+        Updates a specific column in table5 for a given lesson.
+        """
+        table5 = StudentDataAccessor(self._student).get_table5(lesson_title)
+        if column_name not in table5.columns:
+            raise ValueError(f"Column '{column_name}' not found in Table5 for lesson '{lesson_title}'.")
+        if not isinstance(new_column, pd.Series):
+            raise ValueError("new_column must be a pandas Series.")
+        table5[column_name] = new_column
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table5.xlsx'
+        table5.to_excel(file_path, index=False)
+
+    def set_table5_row(self, lesson_title: str, row_index: int, new_row: pd.Series) -> None:
+        """
+        Updates a specific row in table5 for a given lesson.
+        """
+        table5 = StudentDataAccessor(self._student).get_table5(lesson_title)
+        if not 0 <= row_index < len(table5):
+            raise IndexError(f"Row index '{row_index}' is out of range for Table5 in lesson '{lesson_title}'.")
+        if not isinstance(new_row, pd.Series):
+            raise ValueError("new_row must be a pandas Series.")
+        table5.iloc[row_index] = new_row
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table5.xlsx'
+        table5.to_excel(file_path, index=False)
+
+
+# ========================== Getter Functions
+class LessonDataAccessor:
+    """
+    Description: Provides getter functions from lesson instances tables
+    """
+    def __init__(self, lesson_instance):
+        """
+        lesson_instance must be object of Lesson class
+        """
+        self._lesson = lesson_instance
+
+    def get_table_one(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table1 dataframe
+        """
+        return self._lesson.tableOneDataFrame
+
+    def get_table_one_column(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table1 column
+        """
+        return self._lesson.tableOneDataFrame['İlişki Değeri']
+
+    def get_table_two(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table2 dataframe
+        """
+        return self._lesson.tableTwoDataFrame
+
+    def get_table_two_column(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table2 column
+        """
+        return self._lesson.tableTwoDataFrame['TOPLAM']
+
+    def get_table_three(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table3 dataframe
+        """
+        return self._lesson.tableThreeDataFrame
+
+    def get_table_three_column(self) -> pd.DataFrame:
+        """
+        Return lesson_instances table3 column
+        """
+        return self._lesson.tableThreeDataFrame['TOPLAM']
+
+    def get_tableGradesDataFrame(self) -> pd.DataFrame:
+        """
+        Return lesson_instances Grades table dataframe
+        """
+        return self._lesson.tableGradesDataFrame
+
+    def get_tableGradesDataFrame_column(self) -> pd.DataFrame:
+        """
+        Return lesson_instances grades table column
+        """
+        return self._lesson.tableGradesDataFrame['ORT']
+
+
+class StudentDataAccessor:
+    """
+    Description: Provides getter functions to access table4 and table5 dataframes
+    or their specified columns/rows
+    """
+    def __init__(self, student_instance):
+        self._student = student_instance
+
+    def get_table4(self, lesson_title: str) -> pd.DataFrame:
+        """
+        Returns the entire table4 dataframe for a given lesson.
+        """
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table4.xlsx'
+
+        if os.path.exists(file_path):
+            return pd.read_excel(file_path)
+        else:
+            raise FileNotFoundError(f"Table4 not found for lesson '{lesson_title}'.")
+
+    def get_table4_column(self, lesson_title: str, column_name: str) -> pd.Series:
+        """
+        Returns a specific column from table4 for a given lesson.
+        """
+        table4 = self.get_table4(lesson_title)
+        if column_name in table4.columns:
+            return table4[column_name]
+        else:
+            raise ValueError(f"Column '{column_name}' not found in table4 for lesson '{lesson_title}'.")
+
+    def get_table4_row(self, lesson_title: str, row_index: int) -> pd.Series:
+        """
+        Returns a specific row from table4 for a given lesson.
+        """
+        table4 = self.get_table4(lesson_title)
+        if row_index in table4.index:
+            return table4.iloc[row_index]
+        else:
+            raise IndexError(f"Row index '{row_index}' is out of range for Table4 in lesson '{lesson_title}'.")
+
+    def get_table5(self, lesson_title: str) -> pd.DataFrame:
+        """
+        Returns the entire table5 dataframe for a given lesson.
+        """
+        file_path = f'{DATA_DIR}\\students\\{self._student.id}\\{lesson_title}\\table5.xlsx'
+        if os.path.exists(file_path):
+            return pd.read_excel(file_path)
+        else:
+            raise ValueError(f"Table4 not found for lesson '{lesson_title}'.")
+
+    def get_table5_column(self, lesson_title: str, column_name: str) -> pd.Series:
+        """
+        Returns a specific column from table5 for a given lesson.
+        """
+        table5 = self.get_table5(lesson_title)
+        if column_name in table5.columns:
+            return table5[column_name]
+        else:
+            raise ValueError(f"Column '{column_name}' not found in Table5 for lesson '{lesson_title}'.")
+
+    def get_table5_row(self, lesson_title: str, row_index: int) -> pd.Series:
+        """
+        Returns a specific row from table5 for a given lesson.
+        """
+        table5 = self.get_table5(lesson_title)
+        if 0<= row_index < len(table5):
+            return table5.iloc[row_index]
+        else:
+            raise ValueError(f"Row index '{row_index}' is out of range for Table5 in lesson '{lesson_title}'.")
 
 
 # ========================== Main Functions
