@@ -1,15 +1,15 @@
+# ===============================================
 import os
 import pandas as pd
 from pathlib import Path
 
-# Ana veri dizini
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 DATA_DIR = rf'{ROOT_DIR}\data'
 STUDENTS_DIR = os.path.join(DATA_DIR, "students")
 LESSONS_DIR = os.path.join(DATA_DIR, "lessons")
+# ===============================================
 
 
-# Tabloları birleştirme ve ders klasörlerine kopyalama işlemi
 def aggregate():
     # Tüm ders klasörlerini al
     lesson_dirs = [d for d in os.listdir(LESSONS_DIR) if os.path.isdir(os.path.join(LESSONS_DIR, d))]
