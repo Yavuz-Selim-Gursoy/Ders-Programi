@@ -1,3 +1,4 @@
+# ===============================================
 import os
 import pandas as pd
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 DATA_DIR = f'{ROOT_DIR}\\data'
 LESSON_NAMES = os.listdir(f'{DATA_DIR}\\lessons')
+# ===============================================
 
 
 def rearrange_dataframe(excelPath: str) -> pd.DataFrame:
@@ -32,8 +34,7 @@ def rearrange_dataframe(excelPath: str) -> pd.DataFrame:
 
     return dfFinal
 
-# print(rearrange_dataframe(f"{DATA_DIR}\\lessons\\BLM001\\table2.xlsx"))
-
+# =============================================== Setter/Getters
 def get_column_names(lessonTitle: str) -> list:
     if lessonTitle in LESSON_NAMES:
         df = rearrange_dataframe(f"{DATA_DIR}\\lessons\\{lessonTitle}\\table2.xlsx")
@@ -63,7 +64,6 @@ def set_column_name(lessonTitle: str, new_name: str, old_name: str) -> pd.DataFr
         df.rename(columns={old_name: new_name}, inplace=True)
         return df
 
-
 def write_to_excel(lessonTitle: str, df:pd.DataFrame) -> None:
     file_path = f"{DATA_DIR}\\lessons\\{lessonTitle}\\table2.xlsx"
 
@@ -71,15 +71,3 @@ def write_to_excel(lessonTitle: str, df:pd.DataFrame) -> None:
     df.reset_index(drop=True, inplace=True)
 
     df.to_excel(file_path, index=False)
-
-
-if __name__ == '__main__':
-    # get_percentage("BLM001", "Vize")
-    # set_percentage("BLM001", "Vize", 1)
-    # get_column_names("BLM001")
-
-    updated_df = set_column_name("BLM001", "Öd1", "Öd4")
-    write_to_excel("BLM001", updated_df)
-
-    """ tablo 2 yi excele yazıp
-        tablo 2 nin değerlendirme kriterleri setter(isimlerini değiştirme)"""

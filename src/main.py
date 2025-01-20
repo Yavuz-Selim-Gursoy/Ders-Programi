@@ -369,5 +369,5 @@ if __name__ == '__main__':
         # Create a 'Student' object to represent them.
         studentObj = Student(int(studentID))
 
-    subprocess.call("python aggregate.py", shell=True)
+    subprocess.call(f"python {ROOT_DIR}/src/aggregate.py", shell=False)
 

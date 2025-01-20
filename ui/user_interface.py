@@ -1,5 +1,5 @@
 # ================================================
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets
 from pathlib import Path
 from typing import TypeVar
 from PyQt5.QtCore import pyqtSignal
@@ -10,7 +10,6 @@ import win32com.client as win32
 import os
 import shutil
 import sys
-import runpy
 
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 DATA_DIR = f'{ROOT_DIR}\\data'
@@ -167,7 +166,7 @@ class CreateLessonWindow(QtWidgets.QWidget):
             """
 
             # This function may seem inefficient or unnecessary,
-            # but it actually cuts 25 lines of code from "_validate_inputs" function.
+            # but it actually cuts 30 lines of code from "_validate_inputs" function.
             green = "background-color: rgb(173, 255, 190);"
             red = "background-color: rgb(255, 200, 200);"
 
@@ -245,8 +244,6 @@ class CreateLessonWindow(QtWidgets.QWidget):
         infoBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
         infoBox.exec_()
 
-
-
     # ================================================ Main
     def create_lesson(self) -> None:
         """
@@ -287,8 +284,7 @@ class CreateLessonWindow(QtWidgets.QWidget):
             self.lessonCreated.emit()
 
             self._clear_inputs()
-            subprocess.call(f"python {ROOT_DIR}/src/main.py", shell=True)
-
+            subprocess.call(f"python {ROOT_DIR}/src/main.py", shell=False)
 
         except Exception as e:
             self._show_error_message("Hata", f"Ders oluşturulurken bir hata oluştu: {str(e)}")
@@ -318,13 +314,14 @@ class CreateLessonWindow(QtWidgets.QWidget):
         self.lessonOutputPath = self._upload_table("Ders Çıktısını Seçin")
         self._validate_inputs()
 
-    def go_back_to_main_menu(self):
+    def go_back_to_main_menu(self) -> None:
         # Geri Dön butonuna basıldığında ana menüye dön
         self.hide()  # Dersi Oluştur penceresini gizle
         if hasattr(self, 'parentWindow'):  # Eğer parentWindow özelliği varsa
             self.parentWindow.show()  # Ana menüyü tekrar göster
 
-# =================================DÜZENLENMESİ GEREK============================================================================================
+
+
 class EditLessonWindow(QtWidgets.QWidget):
     """
     Class for "Dersi Düzenle" tab.
@@ -416,7 +413,7 @@ class EditLessonWindow(QtWidgets.QWidget):
         self.setWindowTitle("Ders Düzenle")
         self.setFixedSize(300, 350)
 
-    def load_lesson(self):
+    def load_lesson(self) -> None:
         selected_lesson = self.lessonComboBox.currentText()
         lesson_path = os.path.join(DATA_DIR, "lessons", selected_lesson)
 
@@ -495,7 +492,7 @@ class EditLessonWindow(QtWidgets.QWidget):
             print(f"Hata oluştu: {e}")
             self._show_error_message("Hata", f"Bir hata oluştu: {e}")
 
-    def clear_inputs(self):
+    def clear_inputs(self) -> None:
         """Clear all input fields."""
         self.inputField1.clear()
         self.inputField2.clear()
@@ -545,6 +542,7 @@ class EditLessonWindow(QtWidgets.QWidget):
         infoBox.setText(message)
         infoBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
         infoBox.exec_()
+
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -606,27 +604,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
         centralWidget.setLayout(layout)
 
-    def open_create_lesson_window(self):
+    def open_create_lesson_window(self) -> None:
         # Ders Oluşturma Penceresini Aç
         self.createLessonWindow = CreateLessonWindow()
         # CreateLessonWindow'dan gelen sinyali dinleyin
         self.createLessonWindow.lessonCreated.connect(self.update_combobox)
         self.createLessonWindow.show()
 
-    def open_edit_lesson_window(self):
+    def open_edit_lesson_window(self) -> None:
         # Dersi Düzenleme Penceresini Aç
         self.editLessonWindow = EditLessonWindow()
         self.editLessonWindow.show()
 
-    def update_combobox(self):
+    def update_combobox(self) -> None:
         # ComboBox'ı güncelle
         self.comboBox.clear()
         self.comboBox.addItems(os.listdir(LESSONS_DIR))
 
-    def on_combobox_selection(self, index):
+    def on_combobox_selection(self, index) -> None:
         selectedItem = self.comboBox.currentText()
 
-    def open_table(self, table_name):
+    def open_table(self, table_name) -> None:
         table_path = Path(f"{LESSONS_DIR}/{self.comboBox.currentText()}/{table_name}")
         try:
             # Excel uygulamasını başlat
@@ -639,8 +637,6 @@ class MainWindow(QtWidgets.QMainWindow):
             return workbook
         except Exception as e:
             print(f"Excel dosyasını açarken bir hata oluştu: {e}")
-
-
 
 
 
